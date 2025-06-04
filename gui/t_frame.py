@@ -30,6 +30,7 @@ class TFrame(tk.Frame):
         self.t_value = tk.StringVar()
         self.alpha_value = tk.StringVar()
         self.result_text = tk.StringVar(value="Resultados aparecerán aquí")
+        self.use_complement = tk.BooleanVar(value=False)  # Para usar 1-alpha
         
         # Crear widgets
         self.create_widgets()
@@ -143,6 +144,27 @@ class TFrame(tk.Frame):
         )
         alpha_entry.grid(row=0, column=1, padx=10, pady=10, sticky='w')
         
+        # Checkbox para usar 1-alpha
+        complement_check = tk.Checkbutton(
+            alpha_frame,
+            text="Usar 1-alpha (cola derecha)",
+            variable=self.use_complement,
+            bg=self.styles.colors['frame_bg'],
+            activebackground=self.styles.colors['frame_bg']
+        )
+        complement_check.grid(row=1, column=0, columnspan=3, padx=10, pady=(0, 10), sticky='w')
+        
+        # Añadir información sobre 1-alpha
+        info_label = tk.Label(
+            alpha_frame,
+            text="Nota: Use 1-alpha para obtener el valor en la cola derecha de la distribución",
+            bg=self.styles.colors['frame_bg'],
+            fg=self.styles.colors['accent'],
+            font=self.styles.fonts['small'],
+            justify='left'
+        )
+        info_label.grid(row=2, column=0, columnspan=3, padx=10, pady=(0, 10), sticky='w')
+        
         # Botón para calcular t
         calc_t_button = tk.Button(
             alpha_frame,
@@ -217,6 +239,9 @@ Ejemplos:
             # Calcular alpha usando la distribución t
             alpha = self.t_dist.calculate_area(t_val, df_val)
             
+            # Calcular también el valor complemento (1-alpha)
+            alpha_complement = 1 - alpha
+            
             # También calcular usando integración numérica
             alpha_integral = self.t_dist.calculate_area_integral(t_val, df_val)
             
@@ -224,9 +249,11 @@ Ejemplos:
             self.result_text.set(
                 f"Para t = {t_val} con {df_val} grados de libertad:\n" + 
                 f"Área (alpha) = {alpha:.8f}\n" +
+                f"Complemento (1-alpha) = {alpha_complement:.8f}\n" +
                 f"Área (integración numérica) = {alpha_integral:.8f}\n\n" +
                 f"Interpretación: La probabilidad de que una variable aleatoria t con {df_val} " +
-                f"grados de libertad sea menor o igual que {t_val} es {alpha:.8f} o {alpha*100:.4f}%."
+                f"grados de libertad sea menor o igual que {t_val} es {alpha:.8f} o {alpha*100:.4f}%.\n" +
+                f"La probabilidad de que sea mayor que {t_val} es {alpha_complement:.8f} o {alpha_complement*100:.4f}%."
             )
             
             # Actualizar gráfico
@@ -258,19 +285,37 @@ Ejemplos:
                 )
                 return
             
-            # Calcular t
-            t_val = self.t_dist.calculate_t_for_alpha(alpha_val, df_val)
-            
-            # Actualizar texto de resultados
-            self.result_text.set(
-                f"Para un área (alpha) = {alpha_val} con {df_val} grados de libertad:\n" + 
-                f"El valor t = {t_val:.8f}\n\n" +
-                f"Interpretación: El {alpha_val*100:.4f}% de los valores en una distribución " +
-                f"t con {df_val} grados de libertad son menores o iguales a {t_val:.8f}."
-            )
-            
-            # Actualizar gráfico
-            self.update_plot(df_val, t_val, alpha_val)
+            # Usar complemento si está marcado
+            if self.use_complement.get():
+                # Si queremos usar 1-alpha, entonces buscamos el valor t para el cual
+                # P(T >= t) = alpha_val, que es equivalente a P(T <= t) = 1-alpha_val
+                effective_alpha = 1 - alpha_val
+                t_val = self.t_dist.calculate_t_for_alpha(effective_alpha, df_val)
+                
+                # Actualizar texto de resultados
+                self.result_text.set(
+                    f"Para un área en cola derecha (1-alpha) = {alpha_val} con {df_val} grados de libertad:\n" + 
+                    f"El valor t = {t_val:.8f}\n\n" +
+                    f"Interpretación: El {alpha_val*100:.4f}% de los valores en una distribución " +
+                    f"t con {df_val} grados de libertad son mayores que {t_val:.8f}."
+                )
+                
+                # Actualizar gráfico (mostrando el área como 1-alpha_val)
+                self.update_plot(df_val, t_val, effective_alpha, is_right_tail=True)
+            else:
+                # Calcular t normalmente
+                t_val = self.t_dist.calculate_t_for_alpha(alpha_val, df_val)
+                
+                # Actualizar texto de resultados
+                self.result_text.set(
+                    f"Para un área (alpha) = {alpha_val} con {df_val} grados de libertad:\n" + 
+                    f"El valor t = {t_val:.8f}\n\n" +
+                    f"Interpretación: El {alpha_val*100:.4f}% de los valores en una distribución " +
+                    f"t con {df_val} grados de libertad son menores o iguales a {t_val:.8f}."
+                )
+                
+                # Actualizar gráfico
+                self.update_plot(df_val, t_val, alpha_val)
             
         except ValueError:
             messagebox.showerror(
@@ -278,7 +323,7 @@ Ejemplos:
                 "Ingrese valores numéricos válidos para alpha y grados de libertad."
             )
     
-    def update_plot(self, df=10, t_value=None, area=None):
+    def update_plot(self, df=10, t_value=None, area=None, is_right_tail=False):
         """Actualiza el gráfico de la distribución t"""
         try:
             # Si no se especifica df, usar el valor del campo
@@ -290,7 +335,7 @@ Ejemplos:
                 widget.destroy()
             
             # Crear nuevo gráfico
-            plot_widget = self.plotter.create_t_plot(self.plot_frame, df, t_value, area)
+            plot_widget = self.plotter.create_t_plot(self.plot_frame, df, t_value, area, is_right_tail)
             
             # Colocar el gráfico en el frame
             plot_widget.pack(fill='both', expand=True)

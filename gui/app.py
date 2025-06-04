@@ -33,8 +33,8 @@ class EstadisticaApp:
     def setup_window(self):
         """Configura las propiedades de la ventana principal"""
         self.root.title("Calculadora de Distribuciones Estadísticas")
-        self.root.geometry("800x700")
-        self.root.minsize(800, 700)
+        self.root.geometry("800x800")
+        self.root.minsize(800, 800)
         
         # Aplicar estilos
         self.root = self.styles.configure_widgets(self.root)

@@ -19,7 +19,7 @@ class StatPlotter:
             'background': '#F5F5F5' # Gris muy claro
         }
     
-    def create_z_plot(self, frame, z_value=None, area=None):
+    def create_z_plot(self, frame, z_value=None, area=None, is_right_tail=False):
         """
         Crea un gráfico de la distribución normal estándar, 
         opcionalmente marcando un valor z y sombreando el área
@@ -47,15 +47,28 @@ class StatPlotter:
             
             # Sombrear el área si se proporciona
             if area is not None:
-                fill_x = np.linspace(-4, z_value, 1000)
-                fill_y = stats.norm.pdf(fill_x)
-                ax.fill_between(fill_x, fill_y, 0, alpha=0.2, 
-                               color=self.colors['highlight'])
-                
-                # Añadir texto con el área
-                ax.text(z_value+0.1, stats.norm.pdf(z_value), 
-                       f'z = {z_value:.4f}\nárea = {area:.4f}', 
-                       fontsize=9, color=self.colors['primary'])
+                if is_right_tail:
+                    # Sombrear el área a la derecha (cola derecha)
+                    fill_x = np.linspace(z_value, 4, 1000)
+                    fill_y = stats.norm.pdf(fill_x)
+                    ax.fill_between(fill_x, fill_y, 0, alpha=0.2, 
+                                  color=self.colors['highlight'])
+                    
+                    # Añadir texto con el área
+                    ax.text(z_value+0.1, stats.norm.pdf(z_value), 
+                          f'z = {z_value:.4f}\nárea (1-alpha) = {1-area:.4f}', 
+                          fontsize=9, color=self.colors['primary'])
+                else:
+                    # Sombrear el área a la izquierda (cola izquierda)
+                    fill_x = np.linspace(-4, z_value, 1000)
+                    fill_y = stats.norm.pdf(fill_x)
+                    ax.fill_between(fill_x, fill_y, 0, alpha=0.2, 
+                                  color=self.colors['highlight'])
+                    
+                    # Añadir texto con el área
+                    ax.text(z_value+0.1, stats.norm.pdf(z_value), 
+                          f'z = {z_value:.4f}\nárea (alpha) = {area:.4f}', 
+                          fontsize=9, color=self.colors['primary'])
         
         # Etiquetas y título
         ax.set_title('Distribución Normal Estándar', fontsize=12)
@@ -72,7 +85,7 @@ class StatPlotter:
         
         return canvas.get_tk_widget()
     
-    def create_t_plot(self, frame, df, t_value=None, area=None):
+    def create_t_plot(self, frame, df, t_value=None, area=None, is_right_tail=False):
         """
         Crea un gráfico de la distribución t con los grados de libertad dados,
         opcionalmente marcando un valor t y sombreando el área
@@ -105,15 +118,28 @@ class StatPlotter:
             
             # Sombrear el área si se proporciona
             if area is not None:
-                fill_x = np.linspace(-4, t_value, 1000)
-                fill_y = stats.t.pdf(fill_x, df)
-                ax.fill_between(fill_x, fill_y, 0, alpha=0.2, 
-                               color=self.colors['highlight'])
-                
-                # Añadir texto con el área
-                ax.text(t_value+0.1, stats.t.pdf(t_value, df), 
-                       f't = {t_value:.4f}\nárea = {area:.4f}', 
-                       fontsize=9, color=self.colors['primary'])
+                if is_right_tail:
+                    # Sombrear el área a la derecha (cola derecha)
+                    fill_x = np.linspace(t_value, 4, 1000)
+                    fill_y = stats.t.pdf(fill_x, df)
+                    ax.fill_between(fill_x, fill_y, 0, alpha=0.2, 
+                                  color=self.colors['highlight'])
+                    
+                    # Añadir texto con el área
+                    ax.text(t_value+0.1, stats.t.pdf(t_value, df), 
+                          f't = {t_value:.4f}\nárea (1-alpha) = {1-area:.4f}', 
+                          fontsize=9, color=self.colors['primary'])
+                else:
+                    # Sombrear el área a la izquierda (cola izquierda)
+                    fill_x = np.linspace(-4, t_value, 1000)
+                    fill_y = stats.t.pdf(fill_x, df)
+                    ax.fill_between(fill_x, fill_y, 0, alpha=0.2, 
+                                  color=self.colors['highlight'])
+                    
+                    # Añadir texto con el área
+                    ax.text(t_value+0.1, stats.t.pdf(t_value, df), 
+                          f't = {t_value:.4f}\nárea (alpha) = {area:.4f}', 
+                          fontsize=9, color=self.colors['primary'])
         
         # Etiquetas y título
         ax.set_title(f'Distribución t-Student (df={df})', fontsize=12)
