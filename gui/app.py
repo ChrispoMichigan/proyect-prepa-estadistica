@@ -33,8 +33,8 @@ class EstadisticaApp:
     def setup_window(self):
         """Configura las propiedades de la ventana principal"""
         self.root.title("Calculadora de Distribuciones Estadísticas")
-        self.root.geometry("800x800")
-        self.root.minsize(800, 800)
+        self.root.geometry("800x700")
+        self.root.minsize(800, 700)
         
         # Aplicar estilos
         self.root = self.styles.configure_widgets(self.root)
@@ -64,16 +64,8 @@ class EstadisticaApp:
         # Colocar notebook en la ventana
         self.notebook.pack(expand=True, fill='both', padx=10, pady=10)
         
-        # Crear frame para mensajes de información y botón de ayuda
+        # Crear frame para mensajes de información (sin botón de ayuda)
         self.info_frame = tk.Frame(self.root, bg=self.styles.colors['background'])
-        
-        # Botón de ayuda
-        self.help_button = tk.Button(
-            self.info_frame,
-            text="Ayuda",
-            command=self.show_help
-        )
-        self.help_button.pack(side=tk.RIGHT, padx=10)
         
         # Mensajes de estado
         self.status_label = tk.Label(
@@ -85,31 +77,3 @@ class EstadisticaApp:
         
         # Colocar el frame de información
         self.info_frame.pack(fill='x', padx=10, pady=5)
-    
-    def show_help(self):
-        """Muestra ventana de ayuda"""
-        help_text = """
-Calculadora de Distribuciones Estadísticas
-
-Esta aplicación permite calcular valores de probabilidad (alpha) para la distribución normal estándar (Z) 
-y la distribución t de Student.
-
-Funcionalidades:
-- Calcular el área (alpha) dado un valor de Z o t
-- Encontrar el valor de Z o t dado un área (alpha)
-- Visualizar gráficamente las distribuciones
-
-Para la distribución Z:
-1. Ingresa un valor Z o un valor alpha
-2. Presiona el botón correspondiente para calcular
-3. El resultado se mostrará junto con una gráfica
-
-Para la distribución t:
-1. Ingresa el número de grados de libertad
-2. Ingresa un valor t o un valor alpha
-3. Presiona el botón correspondiente para calcular
-4. El resultado se mostrará junto con una gráfica
-
-Desarrollado para estudiantes de preparatoria.
-        """
-        messagebox.showinfo("Ayuda", help_text)

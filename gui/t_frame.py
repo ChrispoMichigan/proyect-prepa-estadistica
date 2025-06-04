@@ -75,14 +75,7 @@ class TFrame(tk.Frame):
         )
         df_entry.grid(row=0, column=1, padx=10, pady=10, sticky='w')
         
-        # Información sobre grados de libertad
-        df_info_button = tk.Button(
-            df_frame,
-            text="?",
-            width=2,
-            command=self.show_df_help
-        )
-        df_info_button.grid(row=0, column=2, padx=5, pady=10)
+        # Se elimina el botón de información sobre grados de libertad (?)
         
         # Posicionar frame de grados de libertad
         df_frame.pack(fill='x', padx=10, pady=10)
@@ -204,6 +197,7 @@ class TFrame(tk.Frame):
         self.plot_frame = tk.Frame(self, bg=self.styles.colors['frame_bg'])
         self.plot_frame.pack(fill='both', expand=True, padx=10, pady=10)
     
+    # Mantenemos el método para la ayuda, pero ya no se llama desde la interfaz
     def show_df_help(self):
         """Muestra ayuda sobre grados de libertad"""
         help_text = """
